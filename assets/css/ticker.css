@@ -1,0 +1,60 @@
+.sepa-logo-ticker__wrapper {
+	--sepa-logo-ticker-height: 40px;
+	display: flex;
+	overflow: hidden;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+}
+
+.sepa-logo-ticker__track {
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+	gap: 48px;
+	padding-inline-end: 48px;
+	animation: sepa-logo-ticker-slide 40s linear infinite;
+}
+
+.sepa-logo-ticker__logo {
+	height: var(--sepa-logo-ticker-height);
+	width: auto;
+	flex-shrink: 0;
+	object-fit: contain;
+}
+
+@keyframes sepa-logo-ticker-slide {
+	from { transform: translate3d(0, 0, 0); }
+	to { transform: translate3d(-100%, 0, 0); }
+}
+
+@media (max-width: 1024px) {
+	.sepa-logo-ticker__track {
+		gap: 32px;
+		padding-inline-end: 32px;
+		animation-duration: 30s;
+	}
+	.sepa-logo-ticker__logo {
+		height: calc(var(--sepa-logo-ticker-height) * 0.8);
+	}
+}
+
+@media (max-width: 640px) {
+	.sepa-logo-ticker__track {
+		gap: 24px;
+		padding-inline-end: 24px;
+		animation-duration: 24s;
+	}
+	.sepa-logo-ticker__logo {
+		height: calc(var(--sepa-logo-ticker-height) * 0.7);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sepa-logo-ticker__track {
+		animation: none;
+	}
+	.sepa-logo-ticker__wrapper {
+		overflow-x: auto;
+	}
+}

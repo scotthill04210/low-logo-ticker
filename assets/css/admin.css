@@ -1,0 +1,121 @@
+.sepa-logo-ticker-admin .nav-tab-wrapper {
+	margin: 12px 0 16px;
+}
+
+.sepa-logo-ticker-panel[hidden] {
+	display: none;
+}
+
+.sepa-logo-ticker-admin .sepa-logo-ticker-rows {
+	max-width: 820px;
+	margin: 16px 0;
+}
+
+.sepa-logo-ticker-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 12px;
+	margin-bottom: 8px;
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	box-sizing: border-box;
+}
+
+.sepa-logo-ticker-row.ui-sortable-helper {
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.sepa-logo-ticker-row.ui-sortable-placeholder {
+	visibility: visible !important;
+	background: #f0f0f1;
+	border-style: dashed;
+}
+
+.sepa-logo-ticker-row__handle {
+	cursor: grab;
+	color: #787c82;
+	flex-shrink: 0;
+}
+
+.sepa-logo-ticker-row__handle:active {
+	cursor: grabbing;
+}
+
+.sepa-logo-ticker-row__preview {
+	width: 60px;
+	height: 60px;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 2px;
+	overflow: hidden;
+}
+
+.sepa-logo-ticker-row__preview img {
+	max-width: 100%;
+	max-height: 100%;
+	width: auto;
+	height: auto;
+	object-fit: contain;
+}
+
+.sepa-logo-ticker-row__choose {
+	flex-shrink: 0;
+}
+
+.sepa-logo-ticker-row__name {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.sepa-logo-ticker-row__name span {
+	flex-shrink: 0;
+	font-weight: 600;
+}
+
+.sepa-logo-ticker-row__name input {
+	width: 100%;
+	max-width: 280px;
+}
+
+.sepa-logo-ticker-row__actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+	margin-left: auto;
+}
+
+.sepa-logo-ticker-row__duplicate {
+	color: #2271b1;
+	text-decoration: none;
+	padding: 4px 4px;
+	cursor: pointer;
+}
+
+.sepa-logo-ticker-row__duplicate:hover,
+.sepa-logo-ticker-row__duplicate:focus {
+	color: #135e96;
+}
+
+.sepa-logo-ticker-row__remove {
+	color: #b32d2e;
+	font-size: 22px;
+	line-height: 1;
+	text-decoration: none;
+	padding: 4px 8px;
+	cursor: pointer;
+}
+
+.sepa-logo-ticker-row__remove:hover,
+.sepa-logo-ticker-row__remove:focus {
+	color: #8a2424;
+}
