@@ -1,7 +1,7 @@
 (function () {
 	"use strict";
 
-	var PX_PER_SEC = 70;
+	var DEFAULT_SPEED = 70;
 	var MAX_CLONES = 24;
 
 	function prefersReducedMotion() {
@@ -52,10 +52,20 @@
 			return;
 		}
 
+		var speed = parseFloat(wrapper.getAttribute("data-speed"));
+		if ( ! isFinite(speed) || speed < 10 ) {
+			speed = DEFAULT_SPEED;
+		}
+
 		var nextShift = shift + "px";
+		var nextDuration = shift / speed + "s";
+
 		if (wrapper.style.getPropertyValue("--low-logo-ticker-shift") !== nextShift) {
 			wrapper.style.setProperty("--low-logo-ticker-shift", nextShift);
-			wrapper.style.setProperty("--low-logo-ticker-duration", shift / PX_PER_SEC + "s");
+		}
+
+		if (wrapper.style.getPropertyValue("--low-logo-ticker-duration") !== nextDuration) {
+			wrapper.style.setProperty("--low-logo-ticker-duration", nextDuration);
 		}
 	}
 

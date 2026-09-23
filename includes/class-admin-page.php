@@ -65,6 +65,10 @@ class LOW_Logo_Ticker_Admin_Page {
 				'default'           => array(
 					'image_height'        => LOW_LOGO_TICKER_DEFAULT_HEIGHT,
 					'hide_title_on_hover' => false,
+					'speed'               => LOW_LOGO_TICKER_DEFAULT_SPEED,
+					'direction'           => 'left',
+					'pause_on_hover'      => false,
+					'gap'                 => LOW_LOGO_TICKER_DEFAULT_GAP,
 				),
 				'show_in_rest'      => false,
 			)
@@ -119,22 +123,10 @@ class LOW_Logo_Ticker_Admin_Page {
 	 * Sanitize display settings.
 	 *
 	 * @param mixed $input Raw submitted value.
-	 * @return array{image_height: int, hide_title_on_hover: bool}
+	 * @return array{image_height: int, hide_title_on_hover: bool, speed: int, direction: string, pause_on_hover: bool, gap: int}
 	 */
 	public function sanitize_settings( $input ) {
-		if ( ! is_array( $input ) ) {
-			$input = array();
-		}
-
-		$height = isset( $input['image_height'] ) ? absint( $input['image_height'] ) : LOW_LOGO_TICKER_DEFAULT_HEIGHT;
-		if ( $height < 8 ) {
-			$height = LOW_LOGO_TICKER_DEFAULT_HEIGHT;
-		}
-
-		return array(
-			'image_height'        => min( 400, $height ),
-			'hide_title_on_hover' => ! empty( $input['hide_title_on_hover'] ),
-		);
+		return low_logo_ticker_normalize_settings( $input );
 	}
 
 	/**
@@ -224,7 +216,9 @@ class LOW_Logo_Ticker_Admin_Page {
 				<?php
 				if ( 'settings' === $tab ) {
 					settings_fields( self::SETTINGS_GROUP );
+					$field = LOW_LOGO_TICKER_SETTINGS_OPTION;
 					?>
+					<h2><?php esc_html_e( 'Display', 'low-logo-ticker' ); ?></h2>
 					<table class="form-table" role="presentation">
 						<tr>
 							<th scope="row">
@@ -235,7 +229,7 @@ class LOW_Logo_Ticker_Admin_Page {
 									type="number"
 									id="low-logo-ticker-image-height"
 									class="small-text"
-									name="<?php echo esc_attr( LOW_LOGO_TICKER_SETTINGS_OPTION ); ?>[image_height]"
+									name="<?php echo esc_attr( $field ); ?>[image_height]"
 									value="<?php echo esc_attr( (string) $settings['image_height'] ); ?>"
 									min="8"
 									max="400"
@@ -248,13 +242,34 @@ class LOW_Logo_Ticker_Admin_Page {
 							</td>
 						</tr>
 						<tr>
+							<th scope="row">
+								<label for="low-logo-ticker-gap"><?php esc_html_e( 'Logo spacing', 'low-logo-ticker' ); ?></label>
+							</th>
+							<td>
+								<input
+									type="number"
+									id="low-logo-ticker-gap"
+									class="small-text"
+									name="<?php echo esc_attr( $field ); ?>[gap]"
+									value="<?php echo esc_attr( (string) $settings['gap'] ); ?>"
+									min="8"
+									max="200"
+									step="1"
+								/>
+								<?php esc_html_e( 'px', 'low-logo-ticker' ); ?>
+								<p class="description">
+									<?php esc_html_e( 'Space between logos.', 'low-logo-ticker' ); ?>
+								</p>
+							</td>
+						</tr>
+						<tr>
 							<th scope="row"><?php esc_html_e( 'Hover title', 'low-logo-ticker' ); ?></th>
 							<td>
 								<label for="low-logo-ticker-hide-title">
 									<input
 										type="checkbox"
 										id="low-logo-ticker-hide-title"
-										name="<?php echo esc_attr( LOW_LOGO_TICKER_SETTINGS_OPTION ); ?>[hide_title_on_hover]"
+										name="<?php echo esc_attr( $field ); ?>[hide_title_on_hover]"
 										value="1"
 										<?php checked( ! empty( $settings['hide_title_on_hover'] ) ); ?>
 									/>
@@ -262,6 +277,70 @@ class LOW_Logo_Ticker_Admin_Page {
 								</label>
 								<p class="description">
 									<?php esc_html_e( 'Removes the browser tooltip. The name is still used for the image alt text.', 'low-logo-ticker' ); ?>
+								</p>
+							</td>
+						</tr>
+					</table>
+
+					<h2><?php esc_html_e( 'Animation', 'low-logo-ticker' ); ?></h2>
+					<table class="form-table" role="presentation">
+						<tr>
+							<th scope="row">
+								<label for="low-logo-ticker-speed"><?php esc_html_e( 'Speed', 'low-logo-ticker' ); ?></label>
+							</th>
+							<td>
+								<input
+									type="number"
+									id="low-logo-ticker-speed"
+									class="small-text"
+									name="<?php echo esc_attr( $field ); ?>[speed]"
+									value="<?php echo esc_attr( (string) $settings['speed'] ); ?>"
+									min="10"
+									max="400"
+									step="5"
+								/>
+								<?php esc_html_e( 'pixels per second', 'low-logo-ticker' ); ?>
+								<p class="description">
+									<?php esc_html_e( '40 is slow, 70 is the default, 120 is fast.', 'low-logo-ticker' ); ?>
+								</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label for="low-logo-ticker-direction"><?php esc_html_e( 'Direction', 'low-logo-ticker' ); ?></label>
+							</th>
+							<td>
+								<select
+									id="low-logo-ticker-direction"
+									name="<?php echo esc_attr( $field ); ?>[direction]"
+								>
+									<option value="left" <?php selected( $settings['direction'], 'left' ); ?>>
+										<?php esc_html_e( 'Left', 'low-logo-ticker' ); ?>
+									</option>
+									<option value="right" <?php selected( $settings['direction'], 'right' ); ?>>
+										<?php esc_html_e( 'Right', 'low-logo-ticker' ); ?>
+									</option>
+								</select>
+								<p class="description">
+									<?php esc_html_e( 'Which way the logos scroll.', 'low-logo-ticker' ); ?>
+								</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Pause', 'low-logo-ticker' ); ?></th>
+							<td>
+								<label for="low-logo-ticker-pause-hover">
+									<input
+										type="checkbox"
+										id="low-logo-ticker-pause-hover"
+										name="<?php echo esc_attr( $field ); ?>[pause_on_hover]"
+										value="1"
+										<?php checked( ! empty( $settings['pause_on_hover'] ) ); ?>
+									/>
+									<?php esc_html_e( 'Pause on hover', 'low-logo-ticker' ); ?>
+								</label>
+								<p class="description">
+									<?php esc_html_e( 'Stops the animation while the pointer is over the ticker.', 'low-logo-ticker' ); ?>
 								</p>
 							</td>
 						</tr>
@@ -340,7 +419,10 @@ class LOW_Logo_Ticker_Admin_Page {
 			<h3><?php esc_html_e( '2. Display settings', 'low-logo-ticker' ); ?></h3>
 			<ul>
 				<li><?php esc_html_e( 'Image height sets the desktop logo height in pixels (default 40). Tablet and mobile sizes scale down from that value.', 'low-logo-ticker' ); ?></li>
+				<li><?php esc_html_e( 'Logo spacing sets the gap between logos (default 48).', 'low-logo-ticker' ); ?></li>
 				<li><?php esc_html_e( 'Hide title on hover removes the browser tooltip. Alt text from the Name field is kept.', 'low-logo-ticker' ); ?></li>
+				<li><?php esc_html_e( 'Speed is pixels per second (default 70). Direction can be left or right.', 'low-logo-ticker' ); ?></li>
+				<li><?php esc_html_e( 'Pause on hover is optional and off by default.', 'low-logo-ticker' ); ?></li>
 			</ul>
 			<p><?php esc_html_e( 'Saving Settings does not change your logo list, and saving Logos does not change display settings.', 'low-logo-ticker' ); ?></p>
 
@@ -352,7 +434,7 @@ class LOW_Logo_Ticker_Admin_Page {
 			<h3><?php esc_html_e( 'Notes', 'low-logo-ticker' ); ?></h3>
 			<ul>
 				<li><?php esc_html_e( 'Up to 80 logos can be saved.', 'low-logo-ticker' ); ?></li>
-				<li><?php esc_html_e( 'The ticker loops without a gap, even with only a few logos. Logos are not links and do not pause on hover.', 'low-logo-ticker' ); ?></li>
+				<li><?php esc_html_e( 'The ticker loops without a gap, even with only a few logos. Logos are not links.', 'low-logo-ticker' ); ?></li>
 				<li><?php esc_html_e( 'Visitors who prefer reduced motion see a static, horizontally scrollable row instead of the animation.', 'low-logo-ticker' ); ?></li>
 				<li><?php esc_html_e( 'Updates come from GitHub. On the Plugins screen, use Check for update.', 'low-logo-ticker' ); ?></li>
 			</ul>

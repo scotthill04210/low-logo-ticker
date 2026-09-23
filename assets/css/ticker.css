@@ -18,6 +18,14 @@
 	will-change: transform;
 }
 
+.low-logo-ticker__wrapper[data-direction="right"] .low-logo-ticker__mover {
+	animation-direction: reverse;
+}
+
+.low-logo-ticker__wrapper[data-pause-hover="1"]:hover .low-logo-ticker__mover {
+	animation-play-state: paused;
+}
+
 .low-logo-ticker__group {
 	display: flex;
 	align-items: center;
@@ -39,20 +47,12 @@
 }
 
 @media (max-width: 1024px) {
-	.low-logo-ticker__wrapper {
-		--low-logo-ticker-gap: 32px;
-		--low-logo-ticker-duration: 30s;
-	}
 	.low-logo-ticker__logo {
 		height: calc(var(--low-logo-ticker-height) * 0.8);
 	}
 }
 
 @media (max-width: 640px) {
-	.low-logo-ticker__wrapper {
-		--low-logo-ticker-gap: 24px;
-		--low-logo-ticker-duration: 24s;
-	}
 	.low-logo-ticker__logo {
 		height: calc(var(--low-logo-ticker-height) * 0.7);
 	}

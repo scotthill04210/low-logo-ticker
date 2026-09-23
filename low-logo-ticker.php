@@ -3,7 +3,7 @@
  * Plugin Name: LOW Logo Ticker
  * Plugin URI: https://github.com/scotthill04210/low-logo-ticker
  * Description: Animated logo ticker/marquee
- * Version: 1.0.8
+ * Version: 1.0.9
  * Author: Scott Hill
  * Text Domain: low-logo-ticker
  * Requires at least: 6.0
@@ -15,13 +15,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'LOW_LOGO_TICKER_VERSION', '1.0.8' );
+define( 'LOW_LOGO_TICKER_VERSION', '1.0.9' );
 define( 'LOW_LOGO_TICKER_FILE', __FILE__ );
 define( 'LOW_LOGO_TICKER_PATH', plugin_dir_path( __FILE__ ) );
 define( 'LOW_LOGO_TICKER_URL', plugin_dir_url( __FILE__ ) );
 define( 'LOW_LOGO_TICKER_OPTION', 'low_logo_ticker_images' );
 define( 'LOW_LOGO_TICKER_SETTINGS_OPTION', 'low_logo_ticker_settings' );
 define( 'LOW_LOGO_TICKER_DEFAULT_HEIGHT', 40 );
+define( 'LOW_LOGO_TICKER_DEFAULT_SPEED', 70 );
+define( 'LOW_LOGO_TICKER_DEFAULT_GAP', 48 );
 
 require_once LOW_LOGO_TICKER_PATH . 'includes/class-cache.php';
 require_once LOW_LOGO_TICKER_PATH . 'includes/class-shortcode.php';
@@ -47,12 +49,12 @@ function low_logo_ticker_get_images() {
 }
 
 /**
- * Display settings, including image height.
+ * Normalize saved or submitted display settings.
  *
- * @return array{image_height: int, hide_title_on_hover: bool}
+ * @param mixed $settings Raw settings.
+ * @return array{image_height: int, hide_title_on_hover: bool, speed: int, direction: string, pause_on_hover: bool, gap: int}
  */
-function low_logo_ticker_get_settings() {
-	$settings = get_option( LOW_LOGO_TICKER_SETTINGS_OPTION, array() );
+function low_logo_ticker_normalize_settings( $settings ) {
 	if ( ! is_array( $settings ) ) {
 		$settings = array();
 	}
@@ -62,10 +64,34 @@ function low_logo_ticker_get_settings() {
 		$height = LOW_LOGO_TICKER_DEFAULT_HEIGHT;
 	}
 
+	$speed = isset( $settings['speed'] ) ? absint( $settings['speed'] ) : LOW_LOGO_TICKER_DEFAULT_SPEED;
+	$speed = min( 400, max( 10, $speed ) );
+
+	$direction = isset( $settings['direction'] ) ? sanitize_key( $settings['direction'] ) : 'left';
+	if ( ! in_array( $direction, array( 'left', 'right' ), true ) ) {
+		$direction = 'left';
+	}
+
+	$gap = isset( $settings['gap'] ) ? absint( $settings['gap'] ) : LOW_LOGO_TICKER_DEFAULT_GAP;
+	$gap = min( 200, max( 8, $gap ) );
+
 	return array(
 		'image_height'        => min( 400, $height ),
 		'hide_title_on_hover' => ! empty( $settings['hide_title_on_hover'] ),
+		'speed'               => $speed,
+		'direction'           => $direction,
+		'pause_on_hover'      => ! empty( $settings['pause_on_hover'] ),
+		'gap'                 => $gap,
 	);
+}
+
+/**
+ * Display and animation settings.
+ *
+ * @return array{image_height: int, hide_title_on_hover: bool, speed: int, direction: string, pause_on_hover: bool, gap: int}
+ */
+function low_logo_ticker_get_settings() {
+	return low_logo_ticker_normalize_settings( get_option( LOW_LOGO_TICKER_SETTINGS_OPTION, array() ) );
 }
 
 /**

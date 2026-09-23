@@ -204,6 +204,10 @@ class LOW_Logo_Ticker_Cache {
 		$settings   = low_logo_ticker_get_settings();
 		$hide_title = ! empty( $settings['hide_title_on_hover'] );
 		$height     = (int) $settings['image_height'];
+		$speed      = (int) $settings['speed'];
+		$gap        = (int) $settings['gap'];
+		$direction  = (string) $settings['direction'];
+		$pause      = ! empty( $settings['pause_on_hover'] );
 		$group_html = '';
 
 		foreach ( $logos as $logo ) {
@@ -223,7 +227,13 @@ class LOW_Logo_Ticker_Cache {
 			}
 		}
 
-		$html  = '<div class="low-logo-ticker__wrapper" style="' . esc_attr( '--low-logo-ticker-height: ' . $height . 'px' ) . '">';
+		$style = sprintf(
+			'--low-logo-ticker-height: %dpx; --low-logo-ticker-gap: %dpx;',
+			$height,
+			$gap
+		);
+
+		$html  = '<div class="low-logo-ticker__wrapper" style="' . esc_attr( $style ) . '" data-speed="' . esc_attr( (string) $speed ) . '" data-direction="' . esc_attr( $direction ) . '"' . ( $pause ? ' data-pause-hover="1"' : '' ) . '>';
 		$html .= '<div class="low-logo-ticker__mover">';
 		$html .= '<div class="low-logo-ticker__group">' . $group_html . '</div>';
 		$html .= '<div class="low-logo-ticker__group" aria-hidden="true">' . $group_html . '</div>';
