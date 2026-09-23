@@ -14,8 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class LOW_Logo_Ticker_Shortcode {
 
-	const SHORTCODE    = 'low_logo_ticker';
-	const STYLE_HANDLE = 'low-logo-ticker';
+	const SHORTCODE     = 'low_logo_ticker';
+	const STYLE_HANDLE  = 'low-logo-ticker';
+	const SCRIPT_HANDLE = 'low-logo-ticker';
 
 	/**
 	 * Hook front-end actions.
@@ -37,9 +38,18 @@ class LOW_Logo_Ticker_Shortcode {
 			LOW_LOGO_TICKER_VERSION
 		);
 
+		wp_register_script(
+			self::SCRIPT_HANDLE,
+			LOW_LOGO_TICKER_URL . 'assets/js/ticker.js',
+			array(),
+			LOW_LOGO_TICKER_VERSION,
+			true
+		);
+
 		$post = get_post();
 		if ( is_singular() && $post && isset( $post->post_content ) && has_shortcode( $post->post_content, self::SHORTCODE ) ) {
 			wp_enqueue_style( self::STYLE_HANDLE );
+			wp_enqueue_script( self::SCRIPT_HANDLE );
 		}
 	}
 
@@ -55,6 +65,7 @@ class LOW_Logo_Ticker_Shortcode {
 		}
 
 		wp_enqueue_style( self::STYLE_HANDLE );
+		wp_enqueue_script( self::SCRIPT_HANDLE );
 
 		return $html;
 	}

@@ -201,21 +201,20 @@ class LOW_Logo_Ticker_Cache {
 			return '';
 		}
 
-		$settings    = low_logo_ticker_get_settings();
-		$hide_title  = ! empty( $settings['hide_title_on_hover'] );
-		$height      = (int) $settings['image_height'];
-		$track_count = count( $logos ) < 8 ? 3 : 2;
-		$track_html  = '';
+		$settings   = low_logo_ticker_get_settings();
+		$hide_title = ! empty( $settings['hide_title_on_hover'] );
+		$height     = (int) $settings['image_height'];
+		$group_html = '';
 
 		foreach ( $logos as $logo ) {
 			if ( $hide_title ) {
-				$track_html .= sprintf(
+				$group_html .= sprintf(
 					'<img src="%s" class="low-logo-ticker__logo" alt="%s" decoding="async" draggable="false" />',
 					esc_url( $logo['url'] ),
 					esc_attr( $logo['name'] )
 				);
 			} else {
-				$track_html .= sprintf(
+				$group_html .= sprintf(
 					'<img src="%s" class="low-logo-ticker__logo" alt="%s" title="%s" decoding="async" draggable="false" />',
 					esc_url( $logo['url'] ),
 					esc_attr( $logo['name'] ),
@@ -225,12 +224,10 @@ class LOW_Logo_Ticker_Cache {
 		}
 
 		$html  = '<div class="low-logo-ticker__wrapper" style="' . esc_attr( '--low-logo-ticker-height: ' . $height . 'px' ) . '">';
-		for ( $i = 0; $i < $track_count; $i++ ) {
-			$html .= '<div class="low-logo-ticker__track low-logo-ticker__track--animate"' . ( $i > 0 ? ' aria-hidden="true"' : '' ) . '>';
-			$html .= $track_html;
-			$html .= '</div>';
-		}
-		$html .= '</div>';
+		$html .= '<div class="low-logo-ticker__mover">';
+		$html .= '<div class="low-logo-ticker__group">' . $group_html . '</div>';
+		$html .= '<div class="low-logo-ticker__group" aria-hidden="true">' . $group_html . '</div>';
+		$html .= '</div></div>';
 
 		return $html;
 	}

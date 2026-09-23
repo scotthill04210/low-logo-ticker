@@ -2,9 +2,10 @@
 
 WordPress plugin that renders a continuously scrolling logo ticker.
 
-**Version:** 1.1.0  
+**Version:** 1.0.8  
 **Author:** Scott Hill  
-**Requires:** WordPress 6.0+, PHP 7.4+
+**Requires:** WordPress 6.0+, PHP 7.4+  
+**Updates:** [GitHub Releases](https://github.com/scotthill04210/low-logo-ticker/releases)
 
 ## Install
 
@@ -42,9 +43,24 @@ Paste this shortcode into a page, post, text widget, or a Shortcode / HTML block
 
 If no logos are saved, the shortcode outputs nothing.
 
-The ticker keeps scrolling. Logos are not links and do not pause on hover. Visitors who prefer reduced motion see a static, horizontally scrollable row instead of the animation.
+The ticker loops without a gap, even with only a few logos. Logos are not links and do not pause on hover. Visitors who prefer reduced motion see a static, horizontally scrollable row instead of the animation.
 
 In-plugin instructions are also on the **Documentation** tab.
+
+## Updates
+
+WordPress checks [GitHub Releases](https://github.com/scotthill04210/low-logo-ticker/releases). On the Plugins screen, use **Check for update**.
+
+Release zips must have this layout so the plugin path does not change:
+
+```
+LOW-logo-ticker/
+  low-logo-ticker.php
+  includes/
+  assets/
+```
+
+Do not attach a GitHub source archive (`low-logo-ticker-1.0.8/`). Publishing a release runs a workflow that builds the correct zip.
 
 ## File structure
 
@@ -54,8 +70,10 @@ includes/
   class-admin-page.php
   class-shortcode.php
   class-cache.php
+  class-github-updater.php
 assets/
   css/admin.css
   css/ticker.css
   js/admin.js
+  js/ticker.js
 ```

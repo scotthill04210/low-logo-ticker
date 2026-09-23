@@ -1,0 +1,43 @@
+name: Attach plugin zip
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build WordPress-safe zip
+        run: |
+          mkdir -p /tmp/plugin-build/LOW-logo-ticker
+          rsync -a \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude '_preview*' \
+            ./ /tmp/plugin-build/LOW-logo-ticker/
+          cd /tmp/plugin-build
+          zip -r "$GITHUB_WORKSPACE/LOW-logo-ticker.zip" LOW-logo-ticker
+          python3 - <<'PY'
+          import os
+          import zipfile
+          path = os.path.join(os.environ["GITHUB_WORKSPACE"], "LOW-logo-ticker.zip")
+          with zipfile.ZipFile(path) as zf:
+              names = zf.namelist()
+          roots = {name.split("/", 1)[0] for name in names if name}
+          if roots != {"LOW-logo-ticker"}:
+              raise SystemExit(f"Unsafe zip roots: {roots}")
+          if "LOW-logo-ticker/low-logo-ticker.php" not in names:
+              raise SystemExit("Zip is missing LOW-logo-ticker/low-logo-ticker.php")
+          print("Zip root is LOW-logo-ticker/")
+          PY
+
+      - name: Upload zip to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: LOW-logo-ticker.zip

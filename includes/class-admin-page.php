@@ -352,8 +352,9 @@ class LOW_Logo_Ticker_Admin_Page {
 			<h3><?php esc_html_e( 'Notes', 'low-logo-ticker' ); ?></h3>
 			<ul>
 				<li><?php esc_html_e( 'Up to 80 logos can be saved.', 'low-logo-ticker' ); ?></li>
-				<li><?php esc_html_e( 'The ticker keeps scrolling; logos are not links and do not pause on hover.', 'low-logo-ticker' ); ?></li>
+				<li><?php esc_html_e( 'The ticker loops without a gap, even with only a few logos. Logos are not links and do not pause on hover.', 'low-logo-ticker' ); ?></li>
 				<li><?php esc_html_e( 'Visitors who prefer reduced motion see a static, horizontally scrollable row instead of the animation.', 'low-logo-ticker' ); ?></li>
+				<li><?php esc_html_e( 'Updates come from GitHub. On the Plugins screen, use Check for update.', 'low-logo-ticker' ); ?></li>
 			</ul>
 		</div>
 		<?php
