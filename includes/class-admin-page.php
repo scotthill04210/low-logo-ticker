@@ -54,6 +54,7 @@ class LOW_Logo_Ticker_Admin_Page {
 				'sanitize_callback' => array( $this, 'sanitize_images' ),
 				'default'           => array(),
 				'show_in_rest'      => false,
+				'capability'        => 'manage_options',
 			)
 		);
 
@@ -71,6 +72,7 @@ class LOW_Logo_Ticker_Admin_Page {
 					'gap'                 => LOW_LOGO_TICKER_DEFAULT_GAP,
 				),
 				'show_in_rest'      => false,
+				'capability'        => 'manage_options',
 			)
 		);
 	}

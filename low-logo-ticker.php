@@ -3,7 +3,7 @@
  * Plugin Name: LOW Logo Ticker
  * Plugin URI: https://github.com/scotthill04210/low-logo-ticker
  * Description: Animated logo ticker/marquee
- * Version: 1.0.9
+ * Version: 1.0.10
  * Author: Scott Hill
  * Text Domain: low-logo-ticker
  * Requires at least: 6.0
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'LOW_LOGO_TICKER_VERSION', '1.0.9' );
+define( 'LOW_LOGO_TICKER_VERSION', '1.0.10' );
 define( 'LOW_LOGO_TICKER_FILE', __FILE__ );
 define( 'LOW_LOGO_TICKER_PATH', plugin_dir_path( __FILE__ ) );
 define( 'LOW_LOGO_TICKER_URL', plugin_dir_url( __FILE__ ) );
@@ -27,10 +27,12 @@ define( 'LOW_LOGO_TICKER_DEFAULT_GAP', 48 );
 
 require_once LOW_LOGO_TICKER_PATH . 'includes/class-cache.php';
 require_once LOW_LOGO_TICKER_PATH . 'includes/class-shortcode.php';
-require_once LOW_LOGO_TICKER_PATH . 'includes/class-github-updater.php';
 
 if ( is_admin() ) {
 	require_once LOW_LOGO_TICKER_PATH . 'includes/class-admin-page.php';
+	require_once LOW_LOGO_TICKER_PATH . 'includes/class-github-updater.php';
+} elseif ( function_exists( 'wp_doing_cron' ) && wp_doing_cron() ) {
+	require_once LOW_LOGO_TICKER_PATH . 'includes/class-github-updater.php';
 }
 
 /**
@@ -109,7 +111,10 @@ add_action(
 	static function () {
 		LOW_Logo_Ticker_Cache::init();
 		LOW_Logo_Ticker_Shortcode::init();
-		LOW_Logo_Ticker_GitHub_Updater::init();
+
+		if ( class_exists( 'LOW_Logo_Ticker_GitHub_Updater', false ) ) {
+			LOW_Logo_Ticker_GitHub_Updater::init();
+		}
 
 		if ( is_admin() ) {
 			LOW_Logo_Ticker_Admin_Page::init();

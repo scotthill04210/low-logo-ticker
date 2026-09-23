@@ -68,24 +68,28 @@ class LOW_Logo_Ticker_GitHub_Updater {
 	 * @return string[]
 	 */
 	public function plugin_action_links( $links ) {
-		$settings_url = admin_url( 'admin.php?page=low-logo-ticker' );
-		$check_url    = wp_nonce_url(
-			admin_url( 'admin-post.php?action=low_logo_ticker_check_update' ),
-			'low_logo_ticker_check_update'
-		);
+		$extra = array();
 
-		$extra = array(
-			'settings'     => sprintf(
+		if ( current_user_can( 'manage_options' ) ) {
+			$extra['settings'] = sprintf(
 				'<a href="%s">%s</a>',
-				esc_url( $settings_url ),
+				esc_url( admin_url( 'admin.php?page=low-logo-ticker' ) ),
 				esc_html__( 'Settings', 'low-logo-ticker' )
-			),
-			'check_update' => sprintf(
+			);
+		}
+
+		if ( current_user_can( 'update_plugins' ) ) {
+			$extra['check_update'] = sprintf(
 				'<a href="%s">%s</a>',
-				esc_url( $check_url ),
+				esc_url(
+					wp_nonce_url(
+						admin_url( 'admin-post.php?action=low_logo_ticker_check_update' ),
+						'low_logo_ticker_check_update'
+					)
+				),
 				esc_html__( 'Check for update', 'low-logo-ticker' )
-			),
-		);
+			);
+		}
 
 		return array_merge( $extra, $links );
 	}
@@ -101,11 +105,23 @@ class LOW_Logo_Ticker_GitHub_Updater {
 		check_admin_referer( 'low_logo_ticker_check_update' );
 
 		delete_transient( self::CACHE_KEY );
-		delete_site_transient( 'update_plugins' );
+		delete_site_transient( self::CACHE_KEY );
 
-		if ( function_exists( 'wp_update_plugins' ) ) {
-			wp_update_plugins();
+		$updates = get_site_transient( 'update_plugins' );
+		if ( ! is_object( $updates ) ) {
+			$updates = new stdClass();
 		}
+		if ( empty( $updates->checked ) || ! is_array( $updates->checked ) ) {
+			$updates->checked = array();
+		}
+		$updates->checked[ $this->plugin_basename ] = LOW_LOGO_TICKER_VERSION;
+		if ( isset( $updates->response ) && is_array( $updates->response ) ) {
+			unset( $updates->response[ $this->plugin_basename ] );
+		}
+		if ( isset( $updates->no_update ) && is_array( $updates->no_update ) ) {
+			unset( $updates->no_update[ $this->plugin_basename ] );
+		}
+		set_site_transient( 'update_plugins', $this->check_for_update( $updates ) );
 
 		$release = $this->get_latest_release();
 		$status  = 'unavailable';
@@ -280,11 +296,11 @@ class LOW_Logo_Ticker_GitHub_Updater {
 		}
 
 		$explicit = $this->is_our_upgrade( is_array( $hook_extra ) ? $hook_extra : array() );
-		$found    = $this->find_plugin_root( (string) $source );
-
-		if ( ! $explicit && ! $found ) {
+		if ( ! $explicit ) {
 			return $source;
 		}
+
+		$found = $this->find_plugin_root( (string) $source );
 
 		if ( ! $found ) {
 			return new WP_Error(
@@ -417,6 +433,7 @@ class LOW_Logo_Ticker_GitHub_Updater {
 		}
 
 		delete_transient( self::CACHE_KEY );
+		delete_site_transient( self::CACHE_KEY );
 	}
 
 	/**
@@ -425,7 +442,7 @@ class LOW_Logo_Ticker_GitHub_Updater {
 	 * @return array{version:string,download_url:string,html_url:string,body:string,published_at:string}|null
 	 */
 	private function get_latest_release() {
-		$cached = get_transient( self::CACHE_KEY );
+		$cached = get_site_transient( self::CACHE_KEY );
 		if ( false !== $cached ) {
 			return is_array( $cached ) && ! empty( $cached['version'] ) ? $cached : null;
 		}
@@ -433,7 +450,7 @@ class LOW_Logo_Ticker_GitHub_Updater {
 		$response = wp_remote_get(
 			'https://api.github.com/repos/' . self::REPO . '/releases/latest',
 			array(
-				'timeout' => 15,
+				'timeout' => 8,
 				'headers' => array(
 					'Accept'     => 'application/vnd.github+json',
 					'User-Agent' => 'WordPress/' . get_bloginfo( 'version' ) . '; ' . home_url( '/' ),
@@ -442,37 +459,42 @@ class LOW_Logo_Ticker_GitHub_Updater {
 		);
 
 		if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
-			set_transient( self::CACHE_KEY, 'unavailable', HOUR_IN_SECONDS );
+			set_site_transient( self::CACHE_KEY, 'unavailable', HOUR_IN_SECONDS );
 			return null;
 		}
 
 		$data = json_decode( (string) wp_remote_retrieve_body( $response ), true );
 		if ( ! is_array( $data ) || ! empty( $data['prerelease'] ) || ! empty( $data['draft'] ) ) {
-			set_transient( self::CACHE_KEY, 'unavailable', HOUR_IN_SECONDS );
+			set_site_transient( self::CACHE_KEY, 'unavailable', HOUR_IN_SECONDS );
 			return null;
 		}
 
 		$version = $this->normalize_version( (string) ( $data['tag_name'] ?? '' ) );
 		if ( '' === $version ) {
-			set_transient( self::CACHE_KEY, 'unavailable', HOUR_IN_SECONDS );
+			set_site_transient( self::CACHE_KEY, 'unavailable', HOUR_IN_SECONDS );
 			return null;
 		}
 
 		$download_url = $this->pick_download_url( $data );
 		if ( '' === $download_url ) {
-			set_transient( self::CACHE_KEY, 'unavailable', HOUR_IN_SECONDS );
+			set_site_transient( self::CACHE_KEY, 'unavailable', HOUR_IN_SECONDS );
 			return null;
+		}
+
+		$html_url = (string) ( $data['html_url'] ?? '' );
+		if ( ! $this->is_github_page_url( $html_url ) ) {
+			$html_url = 'https://github.com/' . self::REPO . '/releases';
 		}
 
 		$release = array(
 			'version'      => $version,
 			'download_url' => $download_url,
-			'html_url'     => (string) ( $data['html_url'] ?? ( 'https://github.com/' . self::REPO . '/releases' ) ),
+			'html_url'     => $html_url,
 			'body'         => (string) ( $data['body'] ?? '' ),
 			'published_at' => (string) ( $data['published_at'] ?? '' ),
 		);
 
-		set_transient( self::CACHE_KEY, $release, self::CACHE_TTL );
+		set_site_transient( self::CACHE_KEY, $release, self::CACHE_TTL );
 
 		return $release;
 	}
@@ -530,6 +552,25 @@ class LOW_Logo_Ticker_GitHub_Updater {
 	 * @param string $url Candidate URL.
 	 * @return bool
 	 */
+	/**
+	 * GitHub HTML pages only (release notes, repo).
+	 *
+	 * @param string $url Candidate URL.
+	 * @return bool
+	 */
+	private function is_github_page_url( $url ) {
+		$scheme = wp_parse_url( $url, PHP_URL_SCHEME );
+		$host   = wp_parse_url( $url, PHP_URL_HOST );
+		if ( ! is_string( $scheme ) || ! in_array( strtolower( $scheme ), array( 'https', 'http' ), true ) ) {
+			return false;
+		}
+		if ( ! is_string( $host ) || '' === $host ) {
+			return false;
+		}
+
+		return in_array( strtolower( $host ), array( 'github.com', 'www.github.com' ), true );
+	}
+
 	private function is_allowed_package_url( $url ) {
 		$host = wp_parse_url( $url, PHP_URL_HOST );
 		if ( ! is_string( $host ) || '' === $host ) {

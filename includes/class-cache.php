@@ -20,6 +20,13 @@ class LOW_Logo_Ticker_Cache {
 	const MAX_NAME_LENGTH = 200;
 
 	/**
+	 * In-request copy so two shortcodes do not read the option twice.
+	 *
+	 * @var array{v: string, html: string}|null
+	 */
+	private static $runtime = null;
+
+	/**
 	 * Rebuild when logos or settings change.
 	 */
 	public static function init() {
@@ -40,11 +47,17 @@ class LOW_Logo_Ticker_Cache {
 	 * @return string
 	 */
 	public static function get_html() {
+		if ( is_array( self::$runtime ) && array_key_exists( 'html', self::$runtime ) ) {
+			return (string) self::$runtime['html'];
+		}
+
 		$cache = get_option( self::OPTION, null );
 
 		if ( ! is_array( $cache ) || ! isset( $cache['v'] ) || $cache['v'] !== LOW_LOGO_TICKER_VERSION || ! array_key_exists( 'html', $cache ) ) {
 			$cache = self::rebuild();
 		}
+
+		self::$runtime = $cache;
 
 		return isset( $cache['html'] ) ? (string) $cache['html'] : '';
 	}
@@ -63,6 +76,7 @@ class LOW_Logo_Ticker_Cache {
 		);
 
 		update_option( self::OPTION, $cache, true );
+		self::$runtime = $cache;
 
 		return $cache;
 	}
@@ -93,6 +107,7 @@ class LOW_Logo_Ticker_Cache {
 	 */
 	public static function prime_attachments( $ids ) {
 		$ids = array_values( array_unique( array_filter( array_map( 'absint', $ids ) ) ) );
+		$ids = array_slice( $ids, 0, self::MAX_LOGOS );
 		if ( empty( $ids ) ) {
 			return;
 		}
@@ -137,7 +152,11 @@ class LOW_Logo_Ticker_Cache {
 	 */
 	public static function sanitize_name( $name ) {
 		$name = sanitize_text_field( $name );
-		if ( strlen( $name ) > self::MAX_NAME_LENGTH ) {
+		if ( function_exists( 'mb_substr' ) ) {
+			if ( mb_strlen( $name ) > self::MAX_NAME_LENGTH ) {
+				$name = mb_substr( $name, 0, self::MAX_NAME_LENGTH );
+			}
+		} elseif ( strlen( $name ) > self::MAX_NAME_LENGTH ) {
 			$name = substr( $name, 0, self::MAX_NAME_LENGTH );
 		}
 
@@ -157,9 +176,13 @@ class LOW_Logo_Ticker_Cache {
 			}
 		}
 
+		$ids = array_slice( $ids, 0, self::MAX_LOGOS );
 		self::prime_attachments( $ids );
 
-		$logos = array();
+		$height = (int) low_logo_ticker_get_settings()['image_height'];
+		$pixel  = max( 80, min( 800, $height * 2 ) );
+		$size   = array( $pixel, $pixel );
+		$logos  = array();
 
 		foreach ( $rows as $row ) {
 			if ( ! is_array( $row ) ) {
@@ -171,7 +194,10 @@ class LOW_Logo_Ticker_Cache {
 				continue;
 			}
 
-			$url = wp_get_attachment_image_url( $attachment_id, 'full' );
+			$url = wp_get_attachment_image_url( $attachment_id, $size );
+			if ( ! $url ) {
+				$url = wp_get_attachment_image_url( $attachment_id, 'medium' );
+			}
 			if ( ! $url ) {
 				$url = wp_get_attachment_url( $attachment_id );
 			}
