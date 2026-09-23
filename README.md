@@ -2,7 +2,7 @@
 
 WordPress plugin that renders a continuously scrolling logo ticker.
 
-**Version:** 1.0.10  
+**Version:** 1.0.11  
 **Author:** Scott Hill  
 **Requires:** WordPress 6.0+, PHP 7.4+  
 **Updates:** [GitHub Releases](https://github.com/scotthill04210/low-logo-ticker/releases)

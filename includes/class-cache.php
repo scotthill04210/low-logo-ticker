@@ -179,10 +179,7 @@ class LOW_Logo_Ticker_Cache {
 		$ids = array_slice( $ids, 0, self::MAX_LOGOS );
 		self::prime_attachments( $ids );
 
-		$height = (int) low_logo_ticker_get_settings()['image_height'];
-		$pixel  = max( 80, min( 800, $height * 2 ) );
-		$size   = array( $pixel, $pixel );
-		$logos  = array();
+		$logos = array();
 
 		foreach ( $rows as $row ) {
 			if ( ! is_array( $row ) ) {
@@ -194,10 +191,8 @@ class LOW_Logo_Ticker_Cache {
 				continue;
 			}
 
-			$url = wp_get_attachment_image_url( $attachment_id, $size );
-			if ( ! $url ) {
-				$url = wp_get_attachment_image_url( $attachment_id, 'medium' );
-			}
+			// Use uncropped sizes only. array(N, N) often matches the square thumbnail crop.
+			$url = wp_get_attachment_image_url( $attachment_id, 'large' );
 			if ( ! $url ) {
 				$url = wp_get_attachment_url( $attachment_id );
 			}

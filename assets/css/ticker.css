@@ -37,8 +37,10 @@
 .low-logo-ticker__logo {
 	height: var(--low-logo-ticker-height);
 	width: auto;
+	max-width: none;
 	flex-shrink: 0;
 	object-fit: contain;
+	object-position: center;
 }
 
 @keyframes low-logo-ticker-slide {
