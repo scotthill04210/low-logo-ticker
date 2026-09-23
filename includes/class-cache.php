@@ -3,7 +3,7 @@
  * Front-end HTML snapshot. Stored as an autoloaded option so renders
  * do not query attachments. Does not purge page/object caches.
  *
- * @package sepa-logo-ticker
+ * @package low-logo-ticker
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,9 +13,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Builds and reads the ticker HTML cache.
  */
-class SEPA_Logo_Ticker_Cache {
+class LOW_Logo_Ticker_Cache {
 
-	const OPTION = 'sepa_logo_ticker_cache';
+	const OPTION = 'low_logo_ticker_cache';
 	const MAX_LOGOS = 80;
 	const MAX_NAME_LENGTH = 200;
 
@@ -25,10 +25,10 @@ class SEPA_Logo_Ticker_Cache {
 	public static function init() {
 		$callback = array( __CLASS__, 'rebuild' );
 
-		add_action( 'update_option_' . SEPA_LOGO_TICKER_OPTION, $callback );
-		add_action( 'add_option_' . SEPA_LOGO_TICKER_OPTION, $callback );
-		add_action( 'update_option_' . SEPA_LOGO_TICKER_SETTINGS_OPTION, $callback );
-		add_action( 'add_option_' . SEPA_LOGO_TICKER_SETTINGS_OPTION, $callback );
+		add_action( 'update_option_' . LOW_LOGO_TICKER_OPTION, $callback );
+		add_action( 'add_option_' . LOW_LOGO_TICKER_OPTION, $callback );
+		add_action( 'update_option_' . LOW_LOGO_TICKER_SETTINGS_OPTION, $callback );
+		add_action( 'add_option_' . LOW_LOGO_TICKER_SETTINGS_OPTION, $callback );
 		add_action( 'update_option_siteurl', $callback );
 		add_action( 'update_option_home', $callback );
 		add_action( 'delete_attachment', array( __CLASS__, 'maybe_rebuild_on_attachment_delete' ) );
@@ -42,7 +42,7 @@ class SEPA_Logo_Ticker_Cache {
 	public static function get_html() {
 		$cache = get_option( self::OPTION, null );
 
-		if ( ! is_array( $cache ) || ! isset( $cache['v'] ) || $cache['v'] !== SEPA_LOGO_TICKER_VERSION || ! array_key_exists( 'html', $cache ) ) {
+		if ( ! is_array( $cache ) || ! isset( $cache['v'] ) || $cache['v'] !== LOW_LOGO_TICKER_VERSION || ! array_key_exists( 'html', $cache ) ) {
 			$cache = self::rebuild();
 		}
 
@@ -58,7 +58,7 @@ class SEPA_Logo_Ticker_Cache {
 		$logos = self::resolve_logos();
 		$html  = self::build_html( $logos );
 		$cache = array(
-			'v'    => SEPA_LOGO_TICKER_VERSION,
+			'v'    => LOW_LOGO_TICKER_VERSION,
 			'html' => $html,
 		);
 
@@ -78,7 +78,7 @@ class SEPA_Logo_Ticker_Cache {
 			return;
 		}
 
-		foreach ( sepa_logo_ticker_get_images() as $row ) {
+		foreach ( low_logo_ticker_get_images() as $row ) {
 			if ( is_array( $row ) && isset( $row['attachment_id'] ) && absint( $row['attachment_id'] ) === $attachment_id ) {
 				self::rebuild();
 				return;
@@ -148,7 +148,7 @@ class SEPA_Logo_Ticker_Cache {
 	 * @return array<int, array{url: string, name: string}>
 	 */
 	private static function resolve_logos() {
-		$rows = sepa_logo_ticker_get_images();
+		$rows = low_logo_ticker_get_images();
 		$ids  = array();
 
 		foreach ( $rows as $row ) {
@@ -201,7 +201,7 @@ class SEPA_Logo_Ticker_Cache {
 			return '';
 		}
 
-		$settings    = sepa_logo_ticker_get_settings();
+		$settings    = low_logo_ticker_get_settings();
 		$hide_title  = ! empty( $settings['hide_title_on_hover'] );
 		$height      = (int) $settings['image_height'];
 		$track_count = count( $logos ) < 8 ? 3 : 2;
@@ -210,13 +210,13 @@ class SEPA_Logo_Ticker_Cache {
 		foreach ( $logos as $logo ) {
 			if ( $hide_title ) {
 				$track_html .= sprintf(
-					'<img src="%s" class="sepa-logo-ticker__logo" alt="%s" decoding="async" draggable="false" />',
+					'<img src="%s" class="low-logo-ticker__logo" alt="%s" decoding="async" draggable="false" />',
 					esc_url( $logo['url'] ),
 					esc_attr( $logo['name'] )
 				);
 			} else {
 				$track_html .= sprintf(
-					'<img src="%s" class="sepa-logo-ticker__logo" alt="%s" title="%s" decoding="async" draggable="false" />',
+					'<img src="%s" class="low-logo-ticker__logo" alt="%s" title="%s" decoding="async" draggable="false" />',
 					esc_url( $logo['url'] ),
 					esc_attr( $logo['name'] ),
 					esc_attr( $logo['name'] )
@@ -224,9 +224,9 @@ class SEPA_Logo_Ticker_Cache {
 			}
 		}
 
-		$html  = '<div class="sepa-logo-ticker__wrapper" style="' . esc_attr( '--sepa-logo-ticker-height: ' . $height . 'px' ) . '">';
+		$html  = '<div class="low-logo-ticker__wrapper" style="' . esc_attr( '--low-logo-ticker-height: ' . $height . 'px' ) . '">';
 		for ( $i = 0; $i < $track_count; $i++ ) {
-			$html .= '<div class="sepa-logo-ticker__track sepa-logo-ticker__track--animate"' . ( $i > 0 ? ' aria-hidden="true"' : '' ) . '>';
+			$html .= '<div class="low-logo-ticker__track low-logo-ticker__track--animate"' . ( $i > 0 ? ' aria-hidden="true"' : '' ) . '>';
 			$html .= $track_html;
 			$html .= '</div>';
 		}

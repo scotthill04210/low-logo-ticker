@@ -2,7 +2,7 @@
 /**
  * Logo Ticker settings page.
  *
- * @package sepa-logo-ticker
+ * @package low-logo-ticker
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,11 +12,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Registers the admin menu, settings, and repeater UI.
  */
-class SEPA_Logo_Ticker_Admin_Page {
+class LOW_Logo_Ticker_Admin_Page {
 
-	const PAGE_SLUG       = 'sepa-logo-ticker';
-	const OPTION_GROUP    = 'sepa_logo_ticker';
-	const SETTINGS_GROUP  = 'sepa_logo_ticker_display';
+	const PAGE_SLUG       = 'low-logo-ticker';
+	const OPTION_GROUP    = 'low_logo_ticker';
+	const SETTINGS_GROUP  = 'low_logo_ticker_display';
 
 	/**
 	 * Hook admin actions.
@@ -33,8 +33,8 @@ class SEPA_Logo_Ticker_Admin_Page {
 	 */
 	public function register_menu() {
 		add_menu_page(
-			__( 'Logo Ticker Settings', 'sepa-logo-ticker' ),
-			__( 'Logo Ticker', 'sepa-logo-ticker' ),
+			__( 'Logo Ticker Settings', 'low-logo-ticker' ),
+			__( 'Logo Ticker', 'low-logo-ticker' ),
 			'manage_options',
 			self::PAGE_SLUG,
 			array( $this, 'render_page' ),
@@ -49,7 +49,7 @@ class SEPA_Logo_Ticker_Admin_Page {
 	public function register_settings() {
 		register_setting(
 			self::OPTION_GROUP,
-			SEPA_LOGO_TICKER_OPTION,
+			LOW_LOGO_TICKER_OPTION,
 			array(
 				'sanitize_callback' => array( $this, 'sanitize_images' ),
 				'default'           => array(),
@@ -59,11 +59,11 @@ class SEPA_Logo_Ticker_Admin_Page {
 
 		register_setting(
 			self::SETTINGS_GROUP,
-			SEPA_LOGO_TICKER_SETTINGS_OPTION,
+			LOW_LOGO_TICKER_SETTINGS_OPTION,
 			array(
 				'sanitize_callback' => array( $this, 'sanitize_settings' ),
 				'default'           => array(
-					'image_height'        => SEPA_LOGO_TICKER_DEFAULT_HEIGHT,
+					'image_height'        => LOW_LOGO_TICKER_DEFAULT_HEIGHT,
 					'hide_title_on_hover' => false,
 				),
 				'show_in_rest'      => false,
@@ -88,12 +88,12 @@ class SEPA_Logo_Ticker_Admin_Page {
 				$ids[] = absint( $row['attachment_id'] );
 			}
 		}
-		SEPA_Logo_Ticker_Cache::prime_attachments( $ids );
+		LOW_Logo_Ticker_Cache::prime_attachments( $ids );
 
 		$clean = array();
 
 		foreach ( $input as $row ) {
-			if ( count( $clean ) >= SEPA_Logo_Ticker_Cache::MAX_LOGOS ) {
+			if ( count( $clean ) >= LOW_Logo_Ticker_Cache::MAX_LOGOS ) {
 				break;
 			}
 
@@ -102,13 +102,13 @@ class SEPA_Logo_Ticker_Admin_Page {
 			}
 
 			$attachment_id = isset( $row['attachment_id'] ) ? absint( $row['attachment_id'] ) : 0;
-			if ( ! SEPA_Logo_Ticker_Cache::is_allowed_attachment( $attachment_id ) ) {
+			if ( ! LOW_Logo_Ticker_Cache::is_allowed_attachment( $attachment_id ) ) {
 				continue;
 			}
 
 			$clean[] = array(
 				'attachment_id' => $attachment_id,
-				'name'          => SEPA_Logo_Ticker_Cache::sanitize_name( isset( $row['name'] ) ? $row['name'] : '' ),
+				'name'          => LOW_Logo_Ticker_Cache::sanitize_name( isset( $row['name'] ) ? $row['name'] : '' ),
 			);
 		}
 
@@ -126,9 +126,9 @@ class SEPA_Logo_Ticker_Admin_Page {
 			$input = array();
 		}
 
-		$height = isset( $input['image_height'] ) ? absint( $input['image_height'] ) : SEPA_LOGO_TICKER_DEFAULT_HEIGHT;
+		$height = isset( $input['image_height'] ) ? absint( $input['image_height'] ) : LOW_LOGO_TICKER_DEFAULT_HEIGHT;
 		if ( $height < 8 ) {
-			$height = SEPA_LOGO_TICKER_DEFAULT_HEIGHT;
+			$height = LOW_LOGO_TICKER_DEFAULT_HEIGHT;
 		}
 
 		return array(
@@ -144,7 +144,7 @@ class SEPA_Logo_Ticker_Admin_Page {
 	 */
 	private function get_current_tab() {
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'logos';
-		return in_array( $tab, array( 'logos', 'settings' ), true ) ? $tab : 'logos';
+		return in_array( $tab, array( 'logos', 'settings', 'docs' ), true ) ? $tab : 'logos';
 	}
 
 	/**
@@ -158,13 +158,13 @@ class SEPA_Logo_Ticker_Admin_Page {
 		}
 
 		wp_enqueue_style(
-			'sepa-logo-ticker-admin',
-			SEPA_LOGO_TICKER_URL . 'assets/css/admin.css',
+			'low-logo-ticker-admin',
+			LOW_LOGO_TICKER_URL . 'assets/css/admin.css',
 			array(),
-			SEPA_LOGO_TICKER_VERSION
+			LOW_LOGO_TICKER_VERSION
 		);
 
-		if ( 'settings' === $this->get_current_tab() ) {
+		if ( in_array( $this->get_current_tab(), array( 'settings', 'docs' ), true ) ) {
 			return;
 		}
 
@@ -172,19 +172,19 @@ class SEPA_Logo_Ticker_Admin_Page {
 		wp_enqueue_script( 'jquery-ui-sortable' );
 
 		wp_enqueue_script(
-			'sepa-logo-ticker-admin',
-			SEPA_LOGO_TICKER_URL . 'assets/js/admin.js',
+			'low-logo-ticker-admin',
+			LOW_LOGO_TICKER_URL . 'assets/js/admin.js',
 			array( 'jquery', 'jquery-ui-sortable', 'media-editor' ),
-			SEPA_LOGO_TICKER_VERSION,
+			LOW_LOGO_TICKER_VERSION,
 			true
 		);
 
 		wp_localize_script(
-			'sepa-logo-ticker-admin',
-			'sepaLogoTickerAdmin',
+			'low-logo-ticker-admin',
+			'lowLogoTickerAdmin',
 			array(
-				'chooseImage' => __( 'Choose Image', 'sepa-logo-ticker' ),
-				'useImage'    => __( 'Use image', 'sepa-logo-ticker' ),
+				'chooseImage' => __( 'Choose Image', 'low-logo-ticker' ),
+				'useImage'    => __( 'Use image', 'low-logo-ticker' ),
 			)
 		);
 	}
@@ -197,23 +197,29 @@ class SEPA_Logo_Ticker_Admin_Page {
 			return;
 		}
 
-		$rows     = sepa_logo_ticker_get_images();
-		$settings = sepa_logo_ticker_get_settings();
+		$rows     = low_logo_ticker_get_images();
+		$settings = low_logo_ticker_get_settings();
 		$tab      = $this->get_current_tab();
 		$base_url = admin_url( 'admin.php?page=' . self::PAGE_SLUG );
 		?>
-		<div class="wrap sepa-logo-ticker-admin">
+		<div class="wrap low-logo-ticker-admin">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 
 			<nav class="nav-tab-wrapper">
 				<a href="<?php echo esc_url( $base_url ); ?>" class="nav-tab<?php echo 'logos' === $tab ? ' nav-tab-active' : ''; ?>">
-					<?php esc_html_e( 'Logos', 'sepa-logo-ticker' ); ?>
+					<?php esc_html_e( 'Logos', 'low-logo-ticker' ); ?>
 				</a>
 				<a href="<?php echo esc_url( add_query_arg( 'tab', 'settings', $base_url ) ); ?>" class="nav-tab<?php echo 'settings' === $tab ? ' nav-tab-active' : ''; ?>">
-					<?php esc_html_e( 'Settings', 'sepa-logo-ticker' ); ?>
+					<?php esc_html_e( 'Settings', 'low-logo-ticker' ); ?>
+				</a>
+				<a href="<?php echo esc_url( add_query_arg( 'tab', 'docs', $base_url ) ); ?>" class="nav-tab<?php echo 'docs' === $tab ? ' nav-tab-active' : ''; ?>">
+					<?php esc_html_e( 'Documentation', 'low-logo-ticker' ); ?>
 				</a>
 			</nav>
 
+			<?php if ( 'docs' === $tab ) : ?>
+				<?php $this->render_docs(); ?>
+			<?php else : ?>
 			<form method="post" action="options.php">
 				<?php
 				if ( 'settings' === $tab ) {
@@ -222,40 +228,40 @@ class SEPA_Logo_Ticker_Admin_Page {
 					<table class="form-table" role="presentation">
 						<tr>
 							<th scope="row">
-								<label for="sepa-logo-ticker-image-height"><?php esc_html_e( 'Image height', 'sepa-logo-ticker' ); ?></label>
+								<label for="low-logo-ticker-image-height"><?php esc_html_e( 'Image height', 'low-logo-ticker' ); ?></label>
 							</th>
 							<td>
 								<input
 									type="number"
-									id="sepa-logo-ticker-image-height"
+									id="low-logo-ticker-image-height"
 									class="small-text"
-									name="<?php echo esc_attr( SEPA_LOGO_TICKER_SETTINGS_OPTION ); ?>[image_height]"
+									name="<?php echo esc_attr( LOW_LOGO_TICKER_SETTINGS_OPTION ); ?>[image_height]"
 									value="<?php echo esc_attr( (string) $settings['image_height'] ); ?>"
 									min="8"
 									max="400"
 									step="1"
 								/>
-								<?php esc_html_e( 'px', 'sepa-logo-ticker' ); ?>
+								<?php esc_html_e( 'px', 'low-logo-ticker' ); ?>
 								<p class="description">
-									<?php esc_html_e( 'Desktop logo height. Tablet and mobile sizes scale down from this value.', 'sepa-logo-ticker' ); ?>
+									<?php esc_html_e( 'Desktop logo height. Tablet and mobile sizes scale down from this value.', 'low-logo-ticker' ); ?>
 								</p>
 							</td>
 						</tr>
 						<tr>
-							<th scope="row"><?php esc_html_e( 'Hover title', 'sepa-logo-ticker' ); ?></th>
+							<th scope="row"><?php esc_html_e( 'Hover title', 'low-logo-ticker' ); ?></th>
 							<td>
-								<label for="sepa-logo-ticker-hide-title">
+								<label for="low-logo-ticker-hide-title">
 									<input
 										type="checkbox"
-										id="sepa-logo-ticker-hide-title"
-										name="<?php echo esc_attr( SEPA_LOGO_TICKER_SETTINGS_OPTION ); ?>[hide_title_on_hover]"
+										id="low-logo-ticker-hide-title"
+										name="<?php echo esc_attr( LOW_LOGO_TICKER_SETTINGS_OPTION ); ?>[hide_title_on_hover]"
 										value="1"
 										<?php checked( ! empty( $settings['hide_title_on_hover'] ) ); ?>
 									/>
-									<?php esc_html_e( 'Hide title on hover', 'sepa-logo-ticker' ); ?>
+									<?php esc_html_e( 'Hide title on hover', 'low-logo-ticker' ); ?>
 								</label>
 								<p class="description">
-									<?php esc_html_e( 'Removes the browser tooltip. The name is still used for the image alt text.', 'sepa-logo-ticker' ); ?>
+									<?php esc_html_e( 'Removes the browser tooltip. The name is still used for the image alt text.', 'low-logo-ticker' ); ?>
 								</p>
 							</td>
 						</tr>
@@ -264,17 +270,17 @@ class SEPA_Logo_Ticker_Admin_Page {
 				} else {
 					settings_fields( self::OPTION_GROUP );
 					?>
-					<input type="hidden" name="<?php echo esc_attr( SEPA_LOGO_TICKER_OPTION ); ?>[-1][attachment_id]" value="0" />
+					<input type="hidden" name="<?php echo esc_attr( LOW_LOGO_TICKER_OPTION ); ?>[-1][attachment_id]" value="0" />
 					<p class="description">
 						<?php
 						echo esc_html__(
-							'Add logos, set a name (used for alt and title), and drag to reorder. Place the ticker with the [sepa_logo_ticker] shortcode.',
-							'sepa-logo-ticker'
+							'Add logos, set a name (used for alt and title), and drag to reorder. Place the ticker with the [low_logo_ticker] shortcode.',
+							'low-logo-ticker'
 						);
 						?>
 					</p>
 
-					<div class="sepa-logo-ticker-rows" id="sepa-logo-ticker-rows">
+					<div class="low-logo-ticker-rows" id="low-logo-ticker-rows">
 						<?php
 						if ( ! empty( $rows ) ) {
 							$prime_ids = array();
@@ -283,7 +289,7 @@ class SEPA_Logo_Ticker_Admin_Page {
 									$prime_ids[] = absint( $row['attachment_id'] );
 								}
 							}
-							SEPA_Logo_Ticker_Cache::prime_attachments( $prime_ids );
+							LOW_Logo_Ticker_Cache::prime_attachments( $prime_ids );
 
 							foreach ( $rows as $index => $row ) {
 								$this->render_row( (int) $index, $row );
@@ -293,8 +299,8 @@ class SEPA_Logo_Ticker_Admin_Page {
 					</div>
 
 					<p>
-						<button type="button" class="button" id="sepa-logo-ticker-add">
-							<?php esc_html_e( 'Add Logo', 'sepa-logo-ticker' ); ?>
+						<button type="button" class="button" id="low-logo-ticker-add">
+							<?php esc_html_e( 'Add Logo', 'low-logo-ticker' ); ?>
 						</button>
 					</p>
 					<?php
@@ -302,11 +308,54 @@ class SEPA_Logo_Ticker_Admin_Page {
 				submit_button();
 				?>
 			</form>
+			<?php endif; ?>
 		</div>
 
-		<script type="text/html" id="sepa-logo-ticker-row-template">
+		<script type="text/html" id="low-logo-ticker-row-template">
 			<?php $this->render_row( '__i__', array( 'attachment_id' => 0, 'name' => '' ) ); ?>
 		</script>
+		<?php
+	}
+
+	/**
+	 * Usage instructions.
+	 */
+	private function render_docs() {
+		?>
+		<div class="low-logo-ticker-docs">
+			<h2><?php esc_html_e( 'How to use Logo Ticker', 'low-logo-ticker' ); ?></h2>
+			<p>
+				<?php esc_html_e( 'This plugin shows a continuously scrolling row of logos. Add images here, then place the shortcode anywhere WordPress allows shortcodes.', 'low-logo-ticker' ); ?>
+			</p>
+
+			<h3><?php esc_html_e( '1. Add logos', 'low-logo-ticker' ); ?></h3>
+			<ol>
+				<li><?php esc_html_e( 'Open the Logos tab.', 'low-logo-ticker' ); ?></li>
+				<li><?php esc_html_e( 'Click Add Logo, then Choose Image and pick a file from the media library (JPEG, PNG, GIF, WebP, AVIF, or SVG).', 'low-logo-ticker' ); ?></li>
+				<li><?php esc_html_e( 'Enter a Name. That value is used for the image alt text and, unless you hide it in Settings, the hover tooltip.', 'low-logo-ticker' ); ?></li>
+				<li><?php esc_html_e( 'Drag the handle on the left to change the scroll order. Duplicate copies a row; × removes it.', 'low-logo-ticker' ); ?></li>
+				<li><?php esc_html_e( 'Click Save Changes. Rows without an image are discarded.', 'low-logo-ticker' ); ?></li>
+			</ol>
+
+			<h3><?php esc_html_e( '2. Display settings', 'low-logo-ticker' ); ?></h3>
+			<ul>
+				<li><?php esc_html_e( 'Image height sets the desktop logo height in pixels (default 40). Tablet and mobile sizes scale down from that value.', 'low-logo-ticker' ); ?></li>
+				<li><?php esc_html_e( 'Hide title on hover removes the browser tooltip. Alt text from the Name field is kept.', 'low-logo-ticker' ); ?></li>
+			</ul>
+			<p><?php esc_html_e( 'Saving Settings does not change your logo list, and saving Logos does not change display settings.', 'low-logo-ticker' ); ?></p>
+
+			<h3><?php esc_html_e( '3. Place the ticker on the site', 'low-logo-ticker' ); ?></h3>
+			<p><?php esc_html_e( 'Paste this shortcode into a page, post, text widget, or a Shortcode / HTML block:', 'low-logo-ticker' ); ?></p>
+			<p><code>[low_logo_ticker]</code></p>
+			<p><?php esc_html_e( 'If no logos are saved, the shortcode outputs nothing.', 'low-logo-ticker' ); ?></p>
+
+			<h3><?php esc_html_e( 'Notes', 'low-logo-ticker' ); ?></h3>
+			<ul>
+				<li><?php esc_html_e( 'Up to 80 logos can be saved.', 'low-logo-ticker' ); ?></li>
+				<li><?php esc_html_e( 'The ticker keeps scrolling; logos are not links and do not pause on hover.', 'low-logo-ticker' ); ?></li>
+				<li><?php esc_html_e( 'Visitors who prefer reduced motion see a static, horizontally scrollable row instead of the animation.', 'low-logo-ticker' ); ?></li>
+			</ul>
+		</div>
 		<?php
 	}
 
@@ -324,26 +373,26 @@ class SEPA_Logo_Ticker_Admin_Page {
 			$thumb_url = wp_get_attachment_image_url( $attachment_id, 'full' );
 		}
 
-		$field = SEPA_LOGO_TICKER_OPTION . '[' . $index . ']';
+		$field = LOW_LOGO_TICKER_OPTION . '[' . $index . ']';
 		?>
-		<div class="sepa-logo-ticker-row">
-			<span class="sepa-logo-ticker-row__handle dashicons dashicons-menu" aria-hidden="true"></span>
-			<div class="sepa-logo-ticker-row__preview">
+		<div class="low-logo-ticker-row">
+			<span class="low-logo-ticker-row__handle dashicons dashicons-menu" aria-hidden="true"></span>
+			<div class="low-logo-ticker-row__preview">
 				<?php if ( $thumb_url ) : ?>
 					<img src="<?php echo esc_url( $thumb_url ); ?>" alt="" />
 				<?php endif; ?>
 			</div>
-			<button type="button" class="button sepa-logo-ticker-row__choose">
-				<?php esc_html_e( 'Choose Image', 'sepa-logo-ticker' ); ?>
+			<button type="button" class="button low-logo-ticker-row__choose">
+				<?php esc_html_e( 'Choose Image', 'low-logo-ticker' ); ?>
 			</button>
 			<input
 				type="hidden"
-				class="sepa-logo-ticker-row__attachment-id"
+				class="low-logo-ticker-row__attachment-id"
 				name="<?php echo esc_attr( $field ); ?>[attachment_id]"
 				value="<?php echo esc_attr( (string) $attachment_id ); ?>"
 			/>
-			<label class="sepa-logo-ticker-row__name">
-				<span><?php esc_html_e( 'Name', 'sepa-logo-ticker' ); ?></span>
+			<label class="low-logo-ticker-row__name">
+				<span><?php esc_html_e( 'Name', 'low-logo-ticker' ); ?></span>
 				<input
 					type="text"
 					class="regular-text"
@@ -351,14 +400,14 @@ class SEPA_Logo_Ticker_Admin_Page {
 					value="<?php echo esc_attr( $name ); ?>"
 				/>
 			</label>
-			<div class="sepa-logo-ticker-row__actions">
-				<button type="button" class="button-link sepa-logo-ticker-row__duplicate">
-					<?php esc_html_e( 'Duplicate', 'sepa-logo-ticker' ); ?>
+			<div class="low-logo-ticker-row__actions">
+				<button type="button" class="button-link low-logo-ticker-row__duplicate">
+					<?php esc_html_e( 'Duplicate', 'low-logo-ticker' ); ?>
 				</button>
 				<button
 					type="button"
-					class="button-link sepa-logo-ticker-row__remove"
-					aria-label="<?php esc_attr_e( 'Remove', 'sepa-logo-ticker' ); ?>"
+					class="button-link low-logo-ticker-row__remove"
+					aria-label="<?php esc_attr_e( 'Remove', 'low-logo-ticker' ); ?>"
 				>&times;</button>
 			</div>
 		</div>

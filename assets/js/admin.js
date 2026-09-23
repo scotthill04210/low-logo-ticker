@@ -1,12 +1,12 @@
 (function ($) {
 	"use strict";
 
-	var $list = $("#sepa-logo-ticker-rows");
+	var $list = $("#low-logo-ticker-rows");
 	var frame = null;
 	var $activeRow = null;
 
 	function reindexRows() {
-		$list.children(".sepa-logo-ticker-row").each(function (i) {
+		$list.children(".low-logo-ticker-row").each(function (i) {
 			$(this)
 				.find("[name]")
 				.each(function () {
@@ -17,8 +17,8 @@
 					$(this).attr(
 						"name",
 						name.replace(
-							/sepa_logo_ticker_images\[[^\]]+\]/,
-							"sepa_logo_ticker_images[" + i + "]"
+							/low_logo_ticker_images\[[^\]]+\]/,
+							"low_logo_ticker_images[" + i + "]"
 						)
 					);
 				});
@@ -38,14 +38,14 @@
 	}
 
 	function setRowImage($row, attachment) {
-		$row.find(".sepa-logo-ticker-row__attachment-id").val(attachment.id);
+		$row.find(".low-logo-ticker-row__attachment-id").val(attachment.id);
 
 		var url = previewUrl(attachment);
 		if (!url) {
 			return;
 		}
 
-		var $preview = $row.find(".sepa-logo-ticker-row__preview");
+		var $preview = $row.find(".low-logo-ticker-row__preview");
 		var $img = $preview.children("img");
 		if (!$img.length) {
 			$img = $("<img />", { alt: "" }).appendTo($preview);
@@ -59,8 +59,8 @@
 		}
 
 		frame = wp.media({
-			title: sepaLogoTickerAdmin.chooseImage,
-			button: { text: sepaLogoTickerAdmin.useImage },
+			title: lowLogoTickerAdmin.chooseImage,
+			button: { text: lowLogoTickerAdmin.useImage },
 			library: { type: "image" },
 			multiple: false,
 		});
@@ -79,43 +79,43 @@
 		return frame;
 	}
 
-	$list.on("click", ".sepa-logo-ticker-row__choose", function (e) {
+	$list.on("click", ".low-logo-ticker-row__choose", function (e) {
 		e.preventDefault();
 		if (typeof wp === "undefined" || !wp.media) {
 			return;
 		}
-		$activeRow = $(this).closest(".sepa-logo-ticker-row");
+		$activeRow = $(this).closest(".low-logo-ticker-row");
 		getFrame().open();
 	});
 
-	$list.on("click", ".sepa-logo-ticker-row__duplicate", function (e) {
+	$list.on("click", ".low-logo-ticker-row__duplicate", function (e) {
 		e.preventDefault();
-		var $row = $(this).closest(".sepa-logo-ticker-row");
+		var $row = $(this).closest(".low-logo-ticker-row");
 		$row.after($row.clone());
 		reindexRows();
 	});
 
-	$list.on("click", ".sepa-logo-ticker-row__remove", function (e) {
+	$list.on("click", ".low-logo-ticker-row__remove", function (e) {
 		e.preventDefault();
-		$(this).closest(".sepa-logo-ticker-row").remove();
+		$(this).closest(".low-logo-ticker-row").remove();
 		reindexRows();
 	});
 
-	$("#sepa-logo-ticker-add").on("click", function (e) {
+	$("#low-logo-ticker-add").on("click", function (e) {
 		e.preventDefault();
-		var template = $.trim($("#sepa-logo-ticker-row-template").html() || "");
+		var template = $.trim($("#low-logo-ticker-row-template").html() || "");
 		if (!template) {
 			return;
 		}
-		var $row = $($.parseHTML(template)).filter(".sepa-logo-ticker-row");
+		var $row = $($.parseHTML(template)).filter(".low-logo-ticker-row");
 		$list.append($row);
 		reindexRows();
 	});
 
 	if ($.fn.sortable) {
 		$list.sortable({
-			handle: ".sepa-logo-ticker-row__handle",
-			placeholder: "sepa-logo-ticker-row ui-sortable-placeholder",
+			handle: ".low-logo-ticker-row__handle",
+			placeholder: "low-logo-ticker-row ui-sortable-placeholder",
 			forcePlaceholderSize: true,
 			update: reindexRows,
 		});

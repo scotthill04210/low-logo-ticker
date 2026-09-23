@@ -2,7 +2,7 @@
 /**
  * Front-end shortcode and ticker markup.
  *
- * @package sepa-logo-ticker
+ * @package low-logo-ticker
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -10,12 +10,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Registers [sepa_logo_ticker] and prints cached markup.
+ * Registers [low_logo_ticker] and prints cached markup.
  */
-class SEPA_Logo_Ticker_Shortcode {
+class LOW_Logo_Ticker_Shortcode {
 
-	const SHORTCODE    = 'sepa_logo_ticker';
-	const STYLE_HANDLE = 'sepa-logo-ticker';
+	const SHORTCODE    = 'low_logo_ticker';
+	const STYLE_HANDLE = 'low-logo-ticker';
 
 	/**
 	 * Hook front-end actions.
@@ -32,9 +32,9 @@ class SEPA_Logo_Ticker_Shortcode {
 	public function register_and_maybe_enqueue() {
 		wp_register_style(
 			self::STYLE_HANDLE,
-			SEPA_LOGO_TICKER_URL . 'assets/css/ticker.css',
+			LOW_LOGO_TICKER_URL . 'assets/css/ticker.css',
 			array(),
-			SEPA_LOGO_TICKER_VERSION
+			LOW_LOGO_TICKER_VERSION
 		);
 
 		$post = get_post();
@@ -49,7 +49,7 @@ class SEPA_Logo_Ticker_Shortcode {
 	 * @return string
 	 */
 	public function render() {
-		$html = SEPA_Logo_Ticker_Cache::get_html();
+		$html = LOW_Logo_Ticker_Cache::get_html();
 		if ( '' === $html ) {
 			return '';
 		}
