@@ -75,6 +75,10 @@
 		for (var i = 0; i < wrappers.length; i++) {
 			(function (wrapper) {
 				imagesReady(wrapper).then(function () {
+					if (prefersReducedMotion()) {
+						return;
+					}
+
 					fill(wrapper);
 
 					if (typeof ResizeObserver === "undefined") {

@@ -61,14 +61,34 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+	.low-logo-ticker__wrapper {
+		overflow: visible;
+		height: auto;
+	}
+
 	.low-logo-ticker__mover {
 		animation: none;
+		transform: none;
 		will-change: auto;
+		width: 100%;
+		max-width: 100%;
+		flex-wrap: wrap;
+		justify-content: center;
 	}
-	.low-logo-ticker__group[aria-hidden="true"] {
+
+	.low-logo-ticker__group {
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+		flex-shrink: 1;
+		flex-wrap: wrap;
+		justify-content: center;
+		row-gap: var(--low-logo-ticker-gap);
+		column-gap: var(--low-logo-ticker-gap);
+		padding-inline-end: 0;
+	}
+
+	.low-logo-ticker__group:nth-child(n+2) {
 		display: none;
-	}
-	.low-logo-ticker__wrapper {
-		overflow-x: auto;
 	}
 }
